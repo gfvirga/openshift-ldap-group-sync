@@ -1,0 +1,2 @@
+CN=a-openshift-Admin,ou=users,dc=example,dc=com 
+CN=a-openshift-Developer,ou=users,dc=example,dc=com 

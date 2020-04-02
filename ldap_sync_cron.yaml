@@ -1,0 +1,42 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: ldap-sync
+  namespace: openshift-config
+spec:
+  schedule: '*/10 * * * *'
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: ldap-sync
+            image: registry.redhat.io/openshift4/ose-cli
+            imagePullSecrets: 
+              - pull-secret
+            args: 
+              - "-c"
+              - > 
+                sed "s/SVCALDAPBIND/$(cat /var/user/bind/bindPassword)/g" /var/user/config/active_directory_config.yaml >> /tmp/active_directory_config.yaml &&
+                oc adm groups sync --sync-config=/tmp/active_directory_config.yaml --whitelist=/var/user/config/whitelist.txt --confirm
+            volumeMounts:
+            - name: ldap-secret
+              mountPath: "/var/user/bind/"
+              readOnly: true
+            - name: ldap-sync-config
+              mountPath: /var/user/config/
+              readOnly: true
+          serviceAccountName: ldap-sync-sa
+          volumes:
+          - name: ldap-sync-config
+            configMap:
+              name: ldap-sync-config
+              defaultMode: 420
+          - name: ldap-secret
+            secret:
+              secretName: ldap-secret
+              items:
+                - key: bindPassword
+                  path: bindPassword
+              defaultMode: 420
+          restartPolicy: OnFailure

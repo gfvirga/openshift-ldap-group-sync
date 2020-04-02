@@ -1,0 +1,18 @@
+kind: LDAPSyncConfig
+apiVersion: v1
+url: ldap://LDAP_SERVICE_IP:389
+insecure: true
+bindDN: "<ENTER DN>"
+bindPassword: "SVCALDAPBIND"
+activeDirectory:
+    usersQuery:
+        baseDN: "ou=users,dc=example,dc=com"
+        scope: sub
+        derefAliases: never
+        filter: "(objectclass=inetOrgPerson)"
+        pageSize: 0
+    userNameAttributes: [ sAMAccountName ] 
+    groupMembershipAttributes: [ memberOf ] 
+groupUIDNameMapping: 
+  "CN=a-openshift-Admin,ou=users,dc=example,dc=com": admins 
+  "CN=a-openshift-Developer,ou=users,dc=example,dc=com": developers 
